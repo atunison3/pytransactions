@@ -14,6 +14,6 @@ class TransactionRepository:
         '''Gets all transactions'''
         return self.transactions
 
-    def find_by_id(self, transaction_id: int) -> Optional[Transction]:
+    def find_by_id(self, transaction_id: int) -> Optional[Transaction]:
         '''Returns a transaction by transaction id'''
         return next((t for t in self.transactions if t.transaction_id == transaction_id), None)
