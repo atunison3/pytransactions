@@ -1,5 +1,5 @@
-from ..domain.transaction import Transaction
-from ..repositories import SQLiteTransactionRepository
+from domain import Transaction
+from repositories import SQLiteTransactionRepository
 
 class Application:
     def __init__(self, repository: SQLiteTransactionRepository):
@@ -24,3 +24,6 @@ class Application:
             print(f"Transaction found: {transaction}")
         else:
             print(f"No transaction found with ID {transaction_id}")
+
+if __name__=='__main__':
+    app = Application()

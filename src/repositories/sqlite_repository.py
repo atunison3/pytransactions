@@ -1,6 +1,6 @@
 import sqlite3
 
-from ..domain.transaction.py import Transaction
+from domain.transaction import Transaction
 
 class SQLiteTransactionRepository:
     def __init__(self, db_path: str):

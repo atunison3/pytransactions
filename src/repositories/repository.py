@@ -1,6 +1,6 @@
 from typing import Optional, List
 
-from ..domain.transaction.py import Transaction
+from domain.transaction import Transaction
 
 class TransactionRepository:
     def __init__(self):
