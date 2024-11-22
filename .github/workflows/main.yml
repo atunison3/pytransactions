@@ -32,7 +32,7 @@ jobs:
       # Run Ruff for linting
       - name: Run Ruff
         run: |
-          ruff . --exit-zero
+          ruff check
 
       # Run Bandit for security checks
       - name: Run Bandit
