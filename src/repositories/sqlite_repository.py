@@ -1,6 +1,9 @@
 import sqlite3
 
-from domain.transaction import Transaction
+try:
+    from domain.transaction import Transaction
+except ModuleNotFoundError:
+    from ..domain.transaction import Transaction
 
 class SQLiteTransactionRepository:
     def __init__(self, db_path: str):

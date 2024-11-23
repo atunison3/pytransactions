@@ -1,5 +1,9 @@
-from domain import Transaction
-from repositories import SQLiteTransactionRepository
+try:
+    from domain import Transaction
+    from repositories import SQLiteTransactionRepository
+except ModuleNotFoundError:
+    from ..domain.transaction import Transaction 
+    from ..repositories.sqlite_repository import SQLiteTransactionRepository
 
 class Application:
     def __init__(self, repository: SQLiteTransactionRepository):
@@ -26,8 +30,9 @@ class Application:
         else:
             print(f"\033[93mNo transaction found with ID {transaction_id}\033[0m")
 
-    def update_transction(self, transaction_id: int, amount: float, date: str, description: str, category: str, notes: str) -> None:
-        transaction = Transaction(transaction_id, amount, date, description, category, notes)
+    # def update_transction(self, transaction_id: int, amount: float, date: str, description: str, category: str, notes: str) -> None:
+        
+    #     transaction = Transaction(transaction_id, amount, date, description, category, notes)
 
 if __name__=='__main__':
     app = Application()

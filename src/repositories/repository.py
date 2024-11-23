@@ -1,6 +1,9 @@
 from typing import Optional, List
 
-from domain.transaction import Transaction
+try:
+    from domain.transaction import Transaction
+except ModuleNotFoundError:
+    from ..domain.transaction import Transaction
 
 class TransactionRepository:
     def __init__(self):
