@@ -56,6 +56,21 @@ class SQLiteTransactionRepository:
                 return Transaction(row[0], row[1], row[2], row[3], row[4], row[5])
             return None
 
+    def read_last_seven_days(self) -> [Transaction]:
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                '''
+                SELECT * 
+                FROM transactions
+                WHERE DATE(date) >= DATE('now', '-7 days')
+                  AND DATE(date) <= DATE('now')
+                ORDER BY date DESC;
+                '''
+            )
+            rows = cursor.fetchall()
+            return [Transaction(*row) for row in rows]
+
     def update_transaction(self, t: Transaction) -> None:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor() 

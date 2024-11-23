@@ -26,6 +26,10 @@ class Application:
         for transaction in transactions:
             print(transaction)
 
+    def list_last_seven_days(self):
+        '''Gets last seven days of transactions.'''
+        return self.repository.read_last_seven_days()
+
     def find_transaction(self, transaction_id: int):
         '''Returns a transaction given the id'''
         transaction = self.repository.read_transaction_by_id(transaction_id)

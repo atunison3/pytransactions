@@ -71,6 +71,6 @@ async def update_transaction(
     )
 
     return templates.TemplateResponse(
-        'transaction_update_form.html', 
+        'transaction_form.html', 
         {'request': request}
     )

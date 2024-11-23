@@ -15,6 +15,7 @@ if __name__ == "__main__":
         print(' 2. Read all transactions')
         print(' 3. Read transaction by id')
         print(' 4. Update transaction')
+        print(' 5. Read last seven days')
         print('')
 
         resp = input("Enter action: ")
@@ -79,3 +80,12 @@ if __name__ == "__main__":
                 transaction.date, transaction.description, 
                 transaction.category, transaction.notes
             )
+        
+        elif resp == '5':
+            '''Reads last seven days'''
+            transactions = app.list_last_seven_days()
+
+            # Print 
+            print('\033[92m\nTransactions:\n' + '-' * 120 + '\033[0m')
+            for transaction in transactions:
+                print(transaction)
