@@ -52,25 +52,21 @@ async def handle_transaction(
         {"request": request}
     )
 
-@app.post('/update-transaction', response_class=HTMLResponse)
-async def update_transaction(
-    request: Request, 
-    transaction_id: int = Form(...),
-    amount: float = Form(...),
-    date: str = Form(...),
-    description: str = Form(...),
-    category: str = Form(...),
-    notes: str = Form(None)
-):
+@app.get('/get-last-seven-days', response_class=HTMLResponse)
+async def get_last_seven_days(request: Request):
 
     # Use sql app to correct transaction
-    sql_app.correct_transaction(
-        transaction_id, amount, 
-        date, description, 
-        category, notes
-    )
+    print('here')
+    transactions = sql_app.list_last_seven_days()
+    if transactions:
+        print(len(transactions))
+
+    #transactions
 
     return templates.TemplateResponse(
-        'transaction_form.html', 
-        {'request': request}
+        'transactions_last_seven.html', 
+        {
+            'request': request,
+            'transactions': transactions
+        }
     )

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Update Transaction{% endblock %}
+
+{% block content %}
+<h2>Transactions in Last 7 Days</h2>
+
+{% if transactions %}
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Date</th>
+            <th>Amount</th>
+            <th>Description</th>
+            <th>Category</th>
+            <th>Notes</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for transaction in transactions %}
+        <tr>
+            <td>{{ transaction.transaction_id }}</td>
+            <td>{{ transaction.date }}</td>
+            <td>${{ transaction.amount }}</td>
+            <td>{{ transaction.description }}</td>
+            <td>{{ transaction.category }}</td>
+            <td>{{ transaction.notes }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No transactions found in the last 7 days.</p>
+{% endif %}
+
+{% endblock %}
