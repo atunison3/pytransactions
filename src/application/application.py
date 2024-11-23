@@ -11,6 +11,10 @@ class Application:
 
     def create_transaction(self, amount: float, date: str, description: str, category: str, notes: str) -> None:
         '''Adds a transaction to database.'''
+
+        # Correct the category
+        category = category.title()
+        
         transaction = Transaction(None, amount, date, description, category.upper(), notes)
         self.repository.create_transaction(transaction)
         print(f"Transaction added: {transaction}")
@@ -34,6 +38,9 @@ class Application:
 
     def correct_transaction(self, transaction_id: int, amount: float, date: str, description: str, category: str, notes: str) -> None:
         '''Updates a transaction'''
+
+        # Correct the category 
+        category = category.title()
 
         # Create a transaction
         transaction = Transaction(transaction_id, amount, date, description, category, notes)
