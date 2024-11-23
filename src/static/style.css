@@ -73,6 +73,23 @@ form button {
     background-color: #005a9e;
 }
 
+.transaction-container {
+
+    display: flex;
+    gap: 20px;
+}
+
+.transaction-form-box {
+    background-color: #ffffff;
+    flex: 50%;
+    float: left;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 300px;
+  }
+
 
 
 
