@@ -29,10 +29,17 @@ class Application:
             print(f"\n\033[92mTransaction found:\033[0m {transaction}")
         else:
             print(f"\033[93mNo transaction found with ID {transaction_id}\033[0m")
+        return transaction 
 
-    # def update_transction(self, transaction_id: int, amount: float, date: str, description: str, category: str, notes: str) -> None:
-        
-    #     transaction = Transaction(transaction_id, amount, date, description, category, notes)
+
+    def correct_transaction(self, transaction_id: int, amount: float, date: str, description: str, category: str, notes: str) -> None:
+        '''Updates a transaction'''
+
+        # Create a transaction
+        transaction = Transaction(transaction_id, amount, date, description, category, notes)
+
+        self.repository.update_transaction(transaction)
+        print(f"\033[92mTransaction updated {transaction}\033[0m")
 
 if __name__=='__main__':
     app = Application()
