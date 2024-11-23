@@ -1,5 +1,4 @@
 from application import Application 
-from domain import Transaction
 from repositories import SQLiteTransactionRepository
 
 if __name__ == "__main__":
@@ -9,14 +8,46 @@ if __name__ == "__main__":
     # Create the application
     app = Application(sqlite_repo)
 
-    # Add a few transactions
-    app.add_transaction(100.0, "2024-11-22", "Groceries")
-    app.add_transaction(200.0, "2024-11-21", "Rent payment")
+    while True:
+        print('')
+        print(" 0. Quit Application")
+        print(" 1. Add transaction")
+        print(' 2. Read all transactions')
+        print(' 3. Read transaction by id')
+        print('')
 
-    # List all transactions
-    print("\nAll Transactions:")
-    app.list_transactions()
+        resp = input("Enter action: ")
 
-    # Find a transaction by ID
-    print("\nFind Transaction:")
-    app.find_transaction(1)
+        if resp == '0':
+            print('Closing application\n')
+            break
+        elif resp == '1':
+            print('Add a transaction\n')
+            amount = input('Enter amount:            ')
+            date =   input('Enter date [YYYY-MM-DD]: ')
+            desc =   input('Enter description:       ')
+            cat =    input('Enter category:          ')
+            notes =  input('Enter notes:             ')
+
+            # Add transaction
+            try:
+                # Convert dtypes
+                amount = float(amount)
+                app.create_transaction(amount, date, desc, cat, notes)
+
+                # Print closing statement
+                print('\033[92mSuccessfully added transaction\033[0m')
+            except Exception as e:
+                print(f'\033[91mFailed to add transaction:\n    {e}\033[0m')
+
+        elif resp == '2':
+            app.list_transactions()
+
+        elif resp == '3':
+            try:
+                # Get transaction id
+                transaction_id = int(input('Enter transaction id: '))
+
+                app.find_transaction(transaction_id)
+            except Exception as e:
+                print(f'\033[91mFailed to read transaction:\n {e}\033[0m')

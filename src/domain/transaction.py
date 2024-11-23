@@ -11,4 +11,4 @@ class Transaction:
         self.notes = notes 
 
     def __repr__(self):
-        return f"Transaction(id={self.transaction_id}, amount={self.amount}, date='{self.date}', description='{self.description}')"
+        return f"Transaction(id={self.transaction_id}, amount={self.amount}, date='{self.date}', description='{self.description}', category='{self.category}', notes='{self.notes}')"
