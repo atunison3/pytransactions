@@ -68,6 +68,66 @@ async def add_category_form(request: Request):
             'categories': categories
         })
 
+@app.get('/get-last-seven-days', response_class=HTMLResponse)
+async def get_last_seven_days(request: Request):
+
+    # Use sql app to correct transaction
+    transactions = sql_app.list_last_seven_days()
+
+    # Convert to dataframe
+    df = pd.DataFrame([vars(obj) for obj in transactions])
+
+    # Filter df to only purchases
+    df.amount = df.amount * -1
+    df = df.groupby('category').sum().reset_index()
+
+    # Build a chart
+    chart = alt.Chart(df).mark_bar().encode(
+        x=alt.X('category:N', title='Category'),
+        y=alt.Y('amount:Q', title='Amount'),
+    ).properties(
+        width=800
+    )
+
+    return templates.TemplateResponse(
+        'transactions_last_seven.html', 
+        {
+            'request': request,
+            'transactions': transactions,
+            'chart_json': chart.to_json()
+        }
+    )
+
+@app.get('/get-current-month', response_class=HTMLResponse)
+async def get_current_month(request: Request):
+    # Get this months transactions
+    transactions = sql_app.list_current_month()
+
+    # Convert to dataframe
+    df = pd.DataFrame([vars(obj) for obj in transactions])
+
+    # Filter df to only purchases
+    df.amount = df.amount * -1
+    df = df.groupby('category').sum().reset_index()
+
+    # Build a chart
+    chart = alt.Chart(df).mark_bar().encode(
+        x=alt.X('category:N', title='Category'),
+        y=alt.Y('amount:Q', title='Amount'),
+    ).properties(
+        width=800
+    )
+
+    return templates.TemplateResponse(
+        'transactions_this_month.html', 
+        {
+            'request': request,
+            'transactions': transactions,
+            'chart_json': chart.to_json()
+        }
+    )
+
+
 @app.post('/add-category', response_class=HTMLResponse)
 async def add_budet_category(
     request: Request,
@@ -100,7 +160,6 @@ async def add_budet_category(
             'chart_json': chart.to_json()
         }
     )
-
 
 @app.post("/add-transaction", response_class=HTMLResponse)
 async def handle_transaction(
@@ -140,33 +199,5 @@ async def update_trasnaction(
         {'request': request}
     )
 
-@app.get('/get-last-seven-days', response_class=HTMLResponse)
-async def get_last_seven_days(request: Request):
 
-    # Use sql app to correct transaction
-    transactions = sql_app.list_last_seven_days()
-
-    # Convert to dataframe
-    df = pd.DataFrame([vars(obj) for obj in transactions])
-
-    # Filter df to only purchases
-    df.amount = df.amount * -1
-    df = df.groupby('category').sum().reset_index()
-
-    # Build a chart
-    chart = alt.Chart(df).mark_bar().encode(
-        x=alt.X('category:N', title='Category'),
-        y=alt.Y('amount:Q', title='Amount'),
-    ).properties(
-        width=800
-    )
-
-    return templates.TemplateResponse(
-        'transactions_last_seven.html', 
-        {
-            'request': request,
-            'transactions': transactions,
-            'chart_json': chart.to_json()
-        }
-    )
 

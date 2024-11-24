@@ -98,6 +98,20 @@ class SQLiteTransactionRepository:
             rows = cursor.fetchall()
             return [Transaction(*row) for row in rows]
 
+    def read_current_month_transactions(self) -> [Transaction]:
+        with sqlite3.connect(self.db_path) as conn: 
+            cursor = conn.cursor()
+            cursor.execute(
+                '''
+                SELECT *
+                FROM transactions
+                WHERE strftime('%Y-%m', date) = strftime('%Y-%m', 'now')
+                ORDER BY date DESC;
+                '''
+            )
+            rows = cursor.fetchall()
+            return [Transaction(*row) for row in rows]
+
     def read_all_categories(self) -> [Category]:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor() 
