@@ -5,6 +5,12 @@
 {% block content %}
 <h2>Transactions in Last 7 Days</h2>
 
+{% if chart_json %} 
+    <div id="chart"></div>
+
+
+{% endif %}
+
 {% if transactions %}
 <table>
     <thead>
@@ -33,5 +39,14 @@
 {% else %}
 <p>No transactions found in the last 7 days.</p>
 {% endif %}
+
+<script type="text/javascript">
+    const chartSpec = {{ chart_json | safe }};
+    vegaEmbed('#chart', chartSpec).then(function(result) {
+      console.log("Chart rendered successfully");
+    }).catch(function(error) {
+      console.error("Error rendering chart:", error);
+    });
+</script>
 
 {% endblock %}

@@ -1,5 +1,5 @@
-#import altair as alt
-#import pandas as pd
+import altair as alt
+import pandas as pd
 
 from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse
@@ -56,17 +56,29 @@ async def handle_transaction(
 async def get_last_seven_days(request: Request):
 
     # Use sql app to correct transaction
-    print('here')
     transactions = sql_app.list_last_seven_days()
-    if transactions:
-        print(len(transactions))
 
-    #transactions
+    # Convert to dataframe
+    df = pd.DataFrame([vars(obj) for obj in transactions])
+
+    # Filter df to only purchases
+    df.amount = df.amount * -1
+    df = df.groupby('category').sum().reset_index()
+    print(df)
+
+    # Build a chart
+    chart = alt.Chart(df).mark_bar().encode(
+        x=alt.X('category:N', title='Category'),
+        y=alt.Y('amount:Q', title='Amount'),
+    ).properties(
+        width=800
+    )
 
     return templates.TemplateResponse(
         'transactions_last_seven.html', 
         {
             'request': request,
-            'transactions': transactions
+            'transactions': transactions,
+            'chart_json': chart.to_json()
         }
     )
