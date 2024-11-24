@@ -1,8 +1,8 @@
 try:
-    from domain import Transaction
+    from domain import Transaction, Category
     from repositories import SQLiteTransactionRepository
 except ModuleNotFoundError:
-    from ..domain.transaction import Transaction 
+    from ..domain.transaction import Transaction, Category
     from ..repositories.sqlite_repository import SQLiteTransactionRepository
 
 class Application:
@@ -18,6 +18,16 @@ class Application:
         transaction = Transaction(None, amount, date, description, category.title(), notes)
         self.repository.create_transaction(transaction)
         print(f"Transaction added: {transaction}")
+
+    def create_category(self, description: str, monthly_allocation: float, notes: str) -> None:
+        '''Adds a category to database'''
+
+        # Data integrity check
+        description = description.title() 
+
+        category = Category(None, description, monthly_allocation, notes)
+        self.repository.create_category(category)
+        print(f"\033[92mCategory created: {category}\033[0m")
 
     def list_transactions(self):
         '''Gets all transactions'''

@@ -1,9 +1,9 @@
 import sqlite3
 
 try:
-    from domain.transaction import Transaction
+    from domain.transaction import Transaction, Category
 except ModuleNotFoundError:
-    from ..domain.transaction import Transaction
+    from ..domain.transaction import Transaction, Category 
 
 class SQLiteTransactionRepository:
     def __init__(self, db_path: str):
@@ -14,6 +14,8 @@ class SQLiteTransactionRepository:
         '''Initializes the database'''
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
+
+            # Create transactions table
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS transactions (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -23,6 +25,16 @@ class SQLiteTransactionRepository:
                     category TEXT NOT NULL,
                     notes TEXT
                 )
+            ''')
+
+            # Create categories table
+            cursor.execute('''
+            CREATE TABLE IF NOT EXISTS categories (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                description TEXT NOT NULL,
+                monthly_allocation REAL NOT NULL,
+                notes TEXT
+            );
             ''')
             conn.commit()
 
@@ -36,7 +48,20 @@ class SQLiteTransactionRepository:
                     (?, ?, ?, ?, ?)
             ''', (transaction.amount, transaction.date, transaction.description, transaction.category, transaction.notes))
             conn.commit()
-            transaction.transaction_id = cursor.lastrowid
+            #transaction.transaction_id = cursor.lastrowid
+
+    def create_category(self, category: Category):
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO categories 
+                    (description, monthly_allocation, notes)
+                VALUES
+                    (?, ?, ?)
+                )''',
+                (category.description, category.monthly_allocation, category.notes))
+            conn.commit()
+            #category.category_id = cursor.lastrowid
 
     def read_all_transactions(self) -> [Transaction]:
         with sqlite3.connect(self.db_path) as conn:
