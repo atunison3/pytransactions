@@ -22,5 +22,13 @@
     <footer>
         <!--<p>&copy; 2024 My FastAPI App</p>-->
     </footer>
+    <script type="text/javascript">
+        const chartSpec = {{ chart_json | safe }};
+        vegaEmbed('#chart', chartSpec).then(function(result) {
+          console.log("Chart rendered successfully");
+        }).catch(function(error) {
+          console.error("Error rendering chart:", error);
+        });
+    </script>
 </body>
 </html>

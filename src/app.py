@@ -35,6 +35,64 @@ async def add_transaction_form(request: Request):
 async def update_transaction_form(request: Request):
     return templates.TemplateResponse('transaction_update_form.html', {'request': request})
 
+@app.get('/add-category', response_class=HTMLResponse)
+async def add_category_form(request: Request):
+    # Get current category data 
+    categories = sql_app.list_categories()
+
+    # Build df
+    df = pd.DataFrame([vars(obj) for obj in categories])
+
+    # Chart it
+    chart = alt.Chart(df).mark_bar().encode(
+        y=alt.Y('description', title='Category'),
+        x=alt.X('monthly_allocation', title='Monthly Allocation')
+    ).properties(
+        title='Current Categories',
+        width=600
+    )
+
+    return templates.TemplateResponse(
+        'category_form.html', 
+        {
+            'request': request,
+            'chart_json': chart.to_json()
+        })
+
+@app.post('/add-category', response_class=HTMLResponse)
+async def add_budet_category(
+    request: Request,
+    monthly_allocation: float = Form(...),
+    description: str = Form(...),
+    notes: str = Form(...)
+    ):
+
+    sql_app.create_category(description, monthly_allocation, notes)
+
+    # Get current category data 
+    categories = sql_app.list_categories()
+
+    # Build df
+    df = pd.DataFrame([vars(obj) for obj in categories])
+
+    # Chart it
+    chart = alt.Chart(df).mark_bar().encode(
+        y=alt.Y('description', title='Category'),
+        x=alt.X('monthly_allocation', title='Monthly Allocation')
+    ).properties(
+        title='Current Categories',
+        width=600
+    )
+
+    return templates.TemplateResponse(
+        'category_form.html',
+        {
+            'request': request,
+            'chart_json': chart.to_json()
+        }
+    )
+
+
 @app.post("/add-transaction", response_class=HTMLResponse)
 async def handle_transaction(
     request: Request,
@@ -43,7 +101,7 @@ async def handle_transaction(
     description: str = Form(...),
     category: str = Form(...),
     notes: str = Form(None)
-):
+    ):
 
     sql_app.create_transaction(amount, date, description, category, notes)
 
@@ -61,7 +119,7 @@ async def update_trasnaction(
     description: str = Form(...),
     category: str = Form(...),
     notes: str = Form(None)
-):
+    ):
     sql_app.correct_transaction(
         transaction_id, amount, 
         date, description, 
@@ -102,3 +160,4 @@ async def get_last_seven_days(request: Request):
             'chart_json': chart.to_json()
         }
     )
+

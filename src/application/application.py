@@ -2,7 +2,8 @@ try:
     from domain import Transaction, Category
     from repositories import SQLiteTransactionRepository
 except ModuleNotFoundError:
-    from ..domain.transaction import Transaction, Category
+    from ..domain.transaction import Transaction
+    from ..domain.category import Category 
     from ..repositories.sqlite_repository import SQLiteTransactionRepository
 
 class Application:
@@ -40,6 +41,9 @@ class Application:
         '''Gets last seven days of transactions.'''
         return self.repository.read_last_seven_days()
 
+    def list_categories(self) -> [Category]:
+        return self.repository.read_all_categories()
+
     def find_transaction(self, transaction_id: int):
         '''Returns a transaction given the id'''
         transaction = self.repository.read_transaction_by_id(transaction_id)
@@ -48,7 +52,6 @@ class Application:
         else:
             print(f"\033[93mNo transaction found with ID {transaction_id}\033[0m")
         return transaction 
-
 
     def correct_transaction(self, transaction_id: int, amount: float, date: str, description: str, category: str, notes: str) -> None:
         '''Updates a transaction'''

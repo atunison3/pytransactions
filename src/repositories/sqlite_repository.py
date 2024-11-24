@@ -1,9 +1,11 @@
 import sqlite3
 
 try:
-    from domain.transaction import Transaction, Category
+    from domain.transaction import Transaction 
+    from domain.category import Category
 except ModuleNotFoundError:
-    from ..domain.transaction import Transaction, Category 
+    from ..domain.transaction import Transaction
+    from ..domain.category import Category
 
 class SQLiteTransactionRepository:
     def __init__(self, db_path: str):
@@ -58,7 +60,7 @@ class SQLiteTransactionRepository:
                     (description, monthly_allocation, notes)
                 VALUES
                     (?, ?, ?)
-                )''',
+                ''',
                 (category.description, category.monthly_allocation, category.notes))
             conn.commit()
             #category.category_id = cursor.lastrowid
@@ -95,6 +97,13 @@ class SQLiteTransactionRepository:
             )
             rows = cursor.fetchall()
             return [Transaction(*row) for row in rows]
+
+    def read_all_categories(self) -> [Category]:
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor() 
+            cursor.execute('SELECT * FROM categories;')
+            rows = cursor.fetchall()
+            return [Category(*row) for row in rows]
 
     def update_transaction(self, t: Transaction) -> None:
         with sqlite3.connect(self.db_path) as conn:
