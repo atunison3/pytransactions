@@ -29,7 +29,15 @@ async def read_home(request: Request):
 
 @app.get("/add-transaction", response_class=HTMLResponse)
 async def add_transaction_form(request: Request):
-    return templates.TemplateResponse("transaction_form.html", {"request": request})
+    # Get current budget categories
+    categories = sql_app.list_categories()
+
+    return templates.TemplateResponse(
+        "transaction_form.html", 
+        {
+            "request": request,
+            'categories': categories
+        })
 
 @app.get('/update-transaction', response_class=HTMLResponse)
 async def update_transaction_form(request: Request):
@@ -56,7 +64,8 @@ async def add_category_form(request: Request):
         'category_form.html', 
         {
             'request': request,
-            'chart_json': chart.to_json()
+            'chart_json': chart.to_json(),
+            'categories': categories
         })
 
 @app.post('/add-category', response_class=HTMLResponse)
