@@ -15,7 +15,7 @@ class Application:
         # Correct the category
         category = category.title()
         
-        transaction = Transaction(None, amount, date, description, category.upper(), notes)
+        transaction = Transaction(None, amount, date, description, category.title(), notes)
         self.repository.create_transaction(transaction)
         print(f"Transaction added: {transaction}")
 

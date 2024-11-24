@@ -52,6 +52,27 @@ async def handle_transaction(
         {"request": request}
     )
 
+@app.post('/update-transaction', response_class=HTMLResponse)
+async def update_trasnaction(
+    request: Request, 
+    transaction_id: int = Form(...),
+    amount: float = Form(...),
+    date: str = Form(...),
+    description: str = Form(...),
+    category: str = Form(...),
+    notes: str = Form(None)
+):
+    sql_app.correct_transaction(
+        transaction_id, amount, 
+        date, description, 
+        category, notes
+    )
+
+    return templates.TemplateResponse(
+        'transaction_form.html', 
+        {'request': request}
+    )
+
 @app.get('/get-last-seven-days', response_class=HTMLResponse)
 async def get_last_seven_days(request: Request):
 
@@ -64,7 +85,6 @@ async def get_last_seven_days(request: Request):
     # Filter df to only purchases
     df.amount = df.amount * -1
     df = df.groupby('category').sum().reset_index()
-    print(df)
 
     # Build a chart
     chart = alt.Chart(df).mark_bar().encode(
