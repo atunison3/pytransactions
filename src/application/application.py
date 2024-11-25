@@ -59,6 +59,9 @@ class Application:
     def list_current_month(self) -> [Transaction]:
         return self.repository.read_current_month_transactions()
 
+    def list_all_recurring(self) ->[RecurringExpense]:
+        return self.repository.read_all_recurring_expenses()
+
     def find_transaction(self, transaction_id: int):
         '''Returns a transaction given the id'''
         transaction = self.repository.read_transaction_by_id(transaction_id)

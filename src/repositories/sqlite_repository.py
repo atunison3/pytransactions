@@ -101,6 +101,13 @@ class SQLiteTransactionRepository:
             rows = cursor.fetchall()
             return [Transaction(row[0], row[1], row[2], row[3], row[4], row[5]) for row in rows]
 
+    def read_all_recurring_expenses(self) -> [RecurringExpense]:
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM recurring_expenses;')
+            rows = cursor.fetchall()
+            return [RecurringExpense(*row) for row in rows]
+
     def read_transaction_by_id(self, transaction_id: int) -> Transaction:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()

@@ -142,10 +142,15 @@ async def get_current_month(request: Request):
 
 @app.get('/get-recurring-expense', response_class=HTMLResponse)
 async def get_recurring_expenses(request: Request):
+
+    # Get all recurring expenses
+    recurring_expenses = sql_app.list_all_recurring()
+
     return templates.TemplateResponse(
         'recurring_expenses.html',
         {
-            'request': request
+            'request': request,
+            'recurring_expenses': recurring_expenses
         }
     )
 
@@ -206,7 +211,7 @@ async def handle_transaction(
     )
 
 @app.post('/update-transaction', response_class=HTMLResponse)
-async def update_trasnaction(
+async def update_transaction(
     request: Request, 
     transaction_id: int = Form(...),
     amount: float = Form(...),
@@ -249,6 +254,8 @@ async def handle_recurring_expense(
     except Exception as e:
         status_statement = f'Failed to add recurring expense: {e}'
         status_color = 'red'
+
+    
 
     return templates.TemplateResponse(
         'recurring_expenses.html',
