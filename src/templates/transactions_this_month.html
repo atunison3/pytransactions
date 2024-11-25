@@ -3,9 +3,11 @@
 {% block title %}Current Month's Transactions{% endblock %}
 
 {% block content %}
-<h2>Transactions in Last 7 Days</h2>
+<h2>Transactions This Month</h2>
 
 <div id="chart"></div>
+
+<h3>All Transactions:</h3>
 
 {% if transactions %}
 <table>
@@ -24,7 +26,7 @@
         <tr>
             <td>{{ transaction.transaction_id }}</td>
             <td>{{ transaction.date }}</td>
-            <td>${{ transaction.amount }}</td>
+            <td style="text-align: right;">{{ "%.2f" | format(transaction.amount) }}</td>
             <td>{{ transaction.description }}</td>
             <td>{{ transaction.category }}</td>
             <td>{{ transaction.notes }}</td>

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Recurring Expenses{% endblock %}
+
+{% block content %}
+<h2>Non-monthly Recurring Expenses</h2>
+
+{% if status_statement %}
+    {% if status_color == "green" %}
+        <p style="color: greenyellow;">{{ status_statement }}</p>
+    {% else %}
+        <p style="color: red;"> {{ status_statement }}</p>
+    {% endif %}
+{% endif %}
+
+<form action="/add_recurring_expense" method="POST">
+    <!-- Amount -->
+    <label for="amount">Amount:</label><br>
+    <input type="number" id="amount" name="amount" step="0.01" required><br><br>
+
+    <!-- Frequency -->
+    <label for="frequency">Frequency:</label><br>
+    <select id="frequency" name="frequency" required>
+        <option value="Yearly">Yearly</option>
+        <option value="Bi Monthly">Bi-Monthly (Every 2 months)</option>
+        <option value="Quarterly">Quarterly</option>
+        <option value="Semi-Annually">Semi-Annually</option>
+    </select><br><br>
+
+    <!-- Category -->
+    <label for="category">Category:</label><br>
+    <input type="text" id="category" name="category" placeholder="e.g., Rent, Utilities" required><br><br>
+
+    <!-- Description -->
+    <label for="description">Description:</label><br>
+    <input type="text" id="description" name="description" placeholder="Short description of the expense" required><br><br>
+
+    <!-- Notes -->
+    <label for="notes">Notes (optional):</label><br>
+    <textarea id="notes" name="notes" placeholder="Any additional information"></textarea><br><br>
+
+    <!-- Submit Button -->
+    <button type="submit">Add Expense</button>
+</form>
+{% endblock %}

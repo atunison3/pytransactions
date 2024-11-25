@@ -3,9 +3,11 @@ import sqlite3
 try:
     from domain.transaction import Transaction 
     from domain.category import Category
+    from domain.recurring_expense import RecurringExpense
 except ModuleNotFoundError:
     from ..domain.transaction import Transaction
     from ..domain.category import Category
+    from ..domain.recurring_expense import RecurringExpense
 
 class SQLiteTransactionRepository:
     def __init__(self, db_path: str):
@@ -38,9 +40,23 @@ class SQLiteTransactionRepository:
                 notes TEXT
             );
             ''')
+
+            # Create recurring expenses table
+            cursor.execute('''
+            CREATE TABLE recurring_expenses (
+                id INTEGER PRIMARY KEY AUTOINCREMENT, -- Unique identifier for each expense
+                amount REAL NOT NULL,                 -- Expense amount
+                frequency TEXT NOT NULL,              -- Frequency (e.g., "daily", "weekly", "monthly", "yearly")
+                category TEXT NOT NULL REFERENCES categories(description), 
+                description TEXT NOT NULL,            -- Short description of the expense
+                notes TEXT,                           -- Additional notes (optional)
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP -- Timestamp of when the expense was added
+            );
+            ''')
+            
             conn.commit()
 
-    def create_transaction(self, transaction):
+    def create_transaction(self, transaction: Transaction):
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute('''
@@ -64,6 +80,19 @@ class SQLiteTransactionRepository:
                 (category.description, category.monthly_allocation, category.notes))
             conn.commit()
             #category.category_id = cursor.lastrowid
+
+    def create_recurring_expense(self, re: RecurringExpense):
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO recurring_expenses
+                    (amount, frequency, category, description, notes)
+                VALUES
+                    (?, ?, ?, ?, ?)
+                ''',
+                (re.amount, re.frequency, re.category, re.description, re.notes))
+            conn.commit()
+            #re.recurring_expense_id = cursor.lastrowid
 
     def read_all_transactions(self) -> [Transaction]:
         with sqlite3.connect(self.db_path) as conn:

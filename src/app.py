@@ -104,18 +104,31 @@ async def get_current_month(request: Request):
     transactions = sql_app.list_current_month()
 
     # Convert to dataframe
-    df = pd.DataFrame([vars(obj) for obj in transactions])
+    transactions_df = pd.DataFrame([vars(obj) for obj in transactions])
 
     # Filter df to only purchases
-    df.amount = df.amount * -1
-    df = df.groupby('category').sum().reset_index()
+    transactions_df.amount = transactions_df.amount * -1
+    transactions_df = transactions_df.groupby('category').sum().reset_index()
+    transactions_df['color'] = ['Spent'] * len(transactions_df)
+
+    # Merge with categories
+    categories = sql_app.list_categories()
+    categories_df = pd.DataFrame([vars(obj) for obj in categories])
+    categories_df['color'] = ['Allowance'] * len(categories_df)
+    df = transactions_df.merge(categories_df, left_on='category', right_on='description')
+    df = df[['category', 'amount', 'monthly_allocation']]
+
+    # Melt df
+    df = pd.melt(df, id_vars=['category'], value_vars=['amount', 'monthly_allocation'])
+
+    # Filter to only expenses
+    df = df[(df['category'] != 'Income') & (df['category'] != 'Investment')]
 
     # Build a chart
-    chart = alt.Chart(df).mark_bar().encode(
-        x=alt.X('category:N', title='Category'),
-        y=alt.Y('amount:Q', title='Amount'),
-    ).properties(
-        width=800
+    chart = alt.Chart(df).mark_bar(opacity=0.5).encode(
+        y=alt.Y('category:N', title='Category'),
+        x=alt.X('value:Q', title='Amount   [$ USD]').stack(None),
+        color=alt.Color('variable:N', title=None)
     )
 
     return templates.TemplateResponse(
@@ -127,6 +140,14 @@ async def get_current_month(request: Request):
         }
     )
 
+@app.get('/get-recurring-expense', response_class=HTMLResponse)
+async def get_recurring_expenses(request: Request):
+    return templates.TemplateResponse(
+        'recurring_expenses.html',
+        {
+            'request': request
+        }
+    )
 
 @app.post('/add-category', response_class=HTMLResponse)
 async def add_budet_category(
@@ -173,9 +194,15 @@ async def handle_transaction(
 
     sql_app.create_transaction(amount, date, description, category, notes)
 
+    # Get current budget categories
+    categories = sql_app.list_categories()
+
     return templates.TemplateResponse(
         "transaction_form.html",  # Ensure this template exists
-        {"request": request}
+        {
+            "request": request,
+            'categories': categories
+        }
     )
 
 @app.post('/update-transaction', response_class=HTMLResponse)
@@ -194,10 +221,40 @@ async def update_trasnaction(
         category, notes
     )
 
+    # Get current budget categories
+    categories = sql_app.list_categories()
+
     return templates.TemplateResponse(
         'transaction_form.html', 
-        {'request': request}
+        {
+            'request': request,
+            'categories': categories
+        }
     )
 
 
+@app.post('/add_recurring_expense', response_class=HTMLResponse)
+async def handle_recurring_expense(
+    request: Request, 
+    amount: int = Form(...),
+    frequency: str = Form(...),
+    category: str = Form(...),
+    description: str = Form(...),
+    notes: str = Form(None)
+):
+    try:
+        sql_app.create_recurring_expense(amount, frequency, category, description, notes)
+        status_statement = f'Successfully added {description} recurring expense!'
+        status_color = 'green'
+    except Exception as e:
+        status_statement = f'Failed to add recurring expense: {e}'
+        status_color = 'red'
 
+    return templates.TemplateResponse(
+        'recurring_expenses.html',
+        {
+            'request': request,
+            'status_statement': status_statement,
+            'status_color': status_color
+        }
+    )

@@ -1,9 +1,10 @@
 try:
-    from domain import Transaction, Category
+    from domain import Transaction, Category, RecurringExpense
     from repositories import SQLiteTransactionRepository
 except ModuleNotFoundError:
     from ..domain.transaction import Transaction
     from ..domain.category import Category 
+    from ..domain.recurring_expense import RecurringExpense
     from ..repositories.sqlite_repository import SQLiteTransactionRepository
 
 class Application:
@@ -29,6 +30,17 @@ class Application:
         category = Category(None, description, monthly_allocation, notes)
         self.repository.create_category(category)
         print(f"\033[92mCategory created: {category}\033[0m")
+
+    def create_recurring_expense(
+        self, amount: float, frequency: str, category: str, 
+        description: str, notes: str) -> None:
+        
+        # Data integrity check
+        category = category.title()
+
+        # Create recurring expense
+        recurring_expense = RecurringExpense(None, amount, frequency, category, description, notes, None)
+        self.repository.create_recurring_expense(recurring_expense)
 
     def list_transactions(self):
         '''Gets all transactions'''
