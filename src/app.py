@@ -2,9 +2,10 @@ import altair as alt
 import pandas as pd
 
 from fastapi import FastAPI, Request, Form
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from typing import List, Optional
 
 from .application import Application 
 from .repositories import SQLiteTransactionRepository
@@ -31,17 +32,48 @@ async def read_home(request: Request):
 async def add_transaction_form(request: Request):
     # Get current budget categories
     categories = sql_app.list_categories()
+    success_message = request.query_params.get("success")
 
     return templates.TemplateResponse(
         "transaction_form.html", 
         {
             "request": request,
-            'categories': categories
+            'categories': categories,
+            'success_message': "Transactions submitted successfully!" if success_message else None
         })
 
 @app.get('/update-transaction', response_class=HTMLResponse)
 async def update_transaction_form(request: Request):
     return templates.TemplateResponse('transaction_update_form.html', {'request': request})
+
+@app.get('/add-batch-transaction', response_class=HTMLResponse)
+async def add_batch_transaction(request: Request):
+    # Get the current categories
+    categories = sql_app.list_categories()
+
+    return templates.TemplateResponse(
+        'multi_transaction_form.html',
+        {
+            'request': request,
+            'categories': categories
+        }
+    )
+   
+@app.post('/submit-itemized-transaction', response_class=HTMLResponse)
+async def process_itemized_transaction(
+    request: Request, 
+    date: str = Form(...),
+    descriptions: list[str] = Form(...),
+    amounts: list[float] = Form(...),
+    categories: list[str] = Form(...),
+    notes: list[str] = Form(None)
+    ):
+    for i in range(len(notes)):
+        #sql_app.create_transaction(amount, date, description, category, notes)
+        sql_app.create_transaction(amounts[i], date, descriptions[i], categories[i], notes[i])
+
+    return RedirectResponse(url="/add-batch-transaction?success=true", status_code=303)
+
 
 @app.get('/add-category', response_class=HTMLResponse)
 async def add_category_form(request: Request):
@@ -236,7 +268,6 @@ async def update_transaction(
             'categories': categories
         }
     )
-
 
 @app.post('/add_recurring_expense', response_class=HTMLResponse)
 async def handle_recurring_expense(

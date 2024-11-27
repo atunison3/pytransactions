@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Batch Transactions{% endblock %} 
+
+{% block content %}
+
+<h2>Batch Transactions</h2>
+
+<form action="/submit-itemized-transaction" id="batch-transactions-form" method="POST">
+    <label for="date">Transaction Date:</label>
+    <input type="date" id="date" name="date" style="width: 150px;"required><br><br>
+
+    <table id="transactionTable">
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Category</th>
+                <th>Notes</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Initial Row -->
+            <tr>
+                <td><input type="text" name="descriptions" placeholder="Description" required></td>
+                <td><input type="number" step="0.01" name="amounts" placeholder="Amount" required></td>
+                <td>
+                    <select name="categories" required>
+                        <option value="" disabled selected>Select Category</option>
+                    {% for category in categories %}
+                        <option value="{{ category.description }}">{{ category.description }}</option>
+                    {% endfor %}
+                    </select>
+                </td>
+                <td><input type="text" name="notes" placeholder="Notes"></td>
+                <td><button type="button" class="btn btn-danger" onclick="deleteRow(this)">Remove</button></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <button type="button" class="btn" onclick="addRow()">Add Row</button><br><br>
+    <button type="submit" class="btn">Submit Transactions</button>
+</form>
+
+<script>
+    function addRow() {
+        const table = document.getElementById('transactionTable');
+        const row = table.insertRow();
+        
+        row.innerHTML = `
+            <td><input type="text" name="descriptions" placeholder="Description" required></td>
+            <td><input type="number" step="0.01" name="amounts" placeholder="Amount" required></td>
+            <td>
+                <select name="categories" required>
+                    <option value="">Select Category</option>
+                    {% for category in categories %}
+                        <option value="{{ category.description }}">{{ category.description }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td><input type="text" name="notes" placeholder="Notes"></td>
+            <td><button type="button" class="btn btn-danger" onclick="deleteRow(this)">Remove</button></td>
+        `;
+    }
+
+    function deleteRow(button) {
+        const row = button.parentNode.parentNode;
+        row.parentNode.removeChild(row);
+    }
+</script>
+
+{% endblock %}

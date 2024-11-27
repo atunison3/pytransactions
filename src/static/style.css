@@ -91,6 +91,35 @@ form button {
     width: 300px;
   }
 
+#batch-transactions-form {
+    max-width: 800px; /* Wider form for better usability */
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+#batch-transactions-form input, 
+#batch-transactions-form select, 
+#batch-transactions-form textarea {
+    width: calc(100% - 20px); /* Consistent padding and spacing */
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+#transaction-table {
+    width: 100%; /* Full-width table */
+    border-collapse: collapse;
+}
+
+#transaction-table td input {
+    width: calc(100% - 10px); /* Input fields adapt to table cell width */
+    box-sizing: border-box;
+}
 
 
 
