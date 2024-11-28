@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Transactions {% endblock %} 
+
+{% block content %} 
+    <h1>Query Transactions</h1>
+    <form method="post" action="/submit-query-transaction">
+        <label for="start_date">Start Date:</label>
+        <input type="date" id="start_date" name="start_date">
+
+        <label for="end_date">End Date:</label>
+        <input type="date" id="end_date" name="end_date">
+
+        <label for="category">Category:</label>
+        <input type="text" id="category" name="category">
+
+        <label for="description">Description:</label>
+        <input type="text" id="description" name="description">
+
+        <button type="submit">Query</button>
+    </form>
+
+    {% if transactions %}
+        <h2>Results</h2>
+        <table border="1">
+            <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Notes</th>
+            </tr>
+            {% for transaction in transactions %}
+            <tr>
+                <td>{{ transaction["transaction_id"] }}</td>
+                <td>{{ transaction["date"] }}</td>
+                <td>{{ transaction["amount"] }}</td>
+                <td>{{ transaction["description"] }}</td>
+                <td>{{ transaction["category"] }}</td>
+                <td>{{ transaction["notes"] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No transactions found.</p>
+    {% endif %}
+
+{% endblock %} 

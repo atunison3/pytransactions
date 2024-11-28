@@ -42,6 +42,15 @@ class Application:
         recurring_expense = RecurringExpense(None, amount, frequency, category, description, notes, None)
         self.repository.create_recurring_expense(recurring_expense)
 
+    def list_transactions_from_dashboard(
+        self, 
+        start_date: str = None, 
+        end_date: str = None, 
+        category: str = None, 
+        description: str = None) -> [Transaction]:
+        
+        return self.repository.query_transactions(start_date, end_date, category, description)
+
     def list_transactions(self):
         '''Gets all transactions'''
         transactions = self.repository.read_all_transactions()
@@ -82,6 +91,10 @@ class Application:
 
         self.repository.update_transaction(transaction)
         print(f"\033[92mTransaction updated {transaction}\033[0m")
+
+    def delete_transaction(self, transaction_id: int):
+        '''Deletes transaction'''
+        self.repository.delete_transaction(transaction_id)
 
 if __name__=='__main__':
     app = Application()

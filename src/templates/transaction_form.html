@@ -63,6 +63,18 @@
     </div>
 </div>
 
+<div class="transaction-container">
+    <div class="transaction-form-box">
+        <h3>Delete a Transaction</h3>
+        <form action="/delete-transaction" method="post">
+            <label for="transaction_id">Transaction ID:</label>
+            <input type="number" step="1" id="transaction_id" name="transaction_id" required><br><br>
+            
+            <button type="submit" class="button">Delete Transaction</button>
+        </form>
+    </div>
+</div>
+
 <script>
     document.getElementById('date').valueAsDate = new Date();
 </script>

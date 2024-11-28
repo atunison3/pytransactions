@@ -94,6 +94,29 @@ class SQLiteTransactionRepository:
             conn.commit()
             #re.recurring_expense_id = cursor.lastrowid
 
+    def query_transactions(self, start_date: str, end_date: str, category: str, description: str):
+        query = "SELECT * FROM transactions WHERE 1=1"
+        params = []
+
+        if start_date:
+            query += " AND date >= ?"
+            params.append(start_date)
+        if end_date:
+            query += " AND date <= ?"
+            params.append(end_date)
+        if category:
+            query += " AND category = ?"
+            params.append(category)
+        if description:
+            query += " AND description LIKE ?"
+            params.append(f"%{description}%")
+
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(query, params)
+            rows = cursor.fetchall() 
+            return [Transaction(*row) for row in rows]
+
     def read_all_transactions(self) -> [Transaction]:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
@@ -170,4 +193,10 @@ class SQLiteTransactionRepository:
             t = cursor.fetchone()
 
             conn.commit()
-            
+
+    def delete_transaction(self, transaction_id: int):
+        '''Deletes a transaction'''
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute('DELETE FROM transactions WHERE id = ?;', (transaction_id,))
+            conn.commit()  

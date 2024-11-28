@@ -1,7 +1,8 @@
 import altair as alt
 import pandas as pd
 
-from fastapi import FastAPI, Request, Form
+from datetime import date
+from fastapi import FastAPI, Request, Form, Query
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -74,6 +75,35 @@ async def process_itemized_transaction(
 
     return RedirectResponse(url="/add-batch-transaction?success=true", status_code=303)
 
+@app.get('/query-transaction', response_class=HTMLResponse)
+async def query_tranasction(request: Request):
+    return templates.TemplateResponse(
+        'query_transactions.html',
+        {
+            'request': request
+        }
+    )
+
+@app.post("/submit-query-transaction", response_class=HTMLResponse)
+async def submit_query_transactions(
+        request: Request,
+        start_date: Optional[str] = Form(None),
+        end_date: Optional[str] = Form(None),
+        category: Optional[str] = Form(None),
+        description: Optional[str] = Form(None)
+    ):
+    # Pass form values to the method
+    transactions = sql_app.list_transactions_from_dashboard(
+        start_date=start_date,
+        end_date=end_date,
+        category=category,
+        description=description
+    ) or []
+
+    return templates.TemplateResponse(
+        "query_transactions.html",
+        {"request": request, "transactions": transactions}
+    )
 
 @app.get('/add-category', response_class=HTMLResponse)
 async def add_category_form(request: Request):
@@ -216,6 +246,24 @@ async def add_budet_category(
         {
             'request': request,
             'chart_json': chart.to_json()
+        }
+    )
+
+@app.post('/delete-transaction', response_class=HTMLResponse)
+async def delete_transaction(
+        request: Request, 
+        transaction_id: int = Form(...)
+    ):
+
+    sql_app.delete_transaction(transaction_id)
+
+    categories = sql_app.list_categories()
+
+    return templates.TemplateResponse(
+        "transaction_form.html",  # Ensure this template exists
+        {
+            "request": request,
+            'categories': categories
         }
     )
 
