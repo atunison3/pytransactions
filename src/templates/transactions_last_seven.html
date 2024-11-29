@@ -24,13 +24,20 @@
         <tr>
             <td>{{ transaction.transaction_id }}</td>
             <td>{{ transaction.date }}</td>
-            <td>${{ transaction.amount }}</td>
+            <td style="text-align: right;">{{ "$" + "{:,.2f}".format(transaction.amount) }}</td>
             <td>{{ transaction.description }}</td>
             <td>{{ transaction.category }}</td>
             <td>{{ transaction.notes }}</td>
         </tr>
         {% endfor %}
     </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="2"><strong>Total Spend</strong></td>
+            <td style="text-align: right;"><strong>{{ "$" + "{:,.2f}".format(transactions | sum(attribute='amount')) }}</strong></td>
+            <td colspan="3"></td>
+        </tr>
+    </tfoot>
 </table>
 {% else %}
 <p>No transactions found in the last 7 days.</p>

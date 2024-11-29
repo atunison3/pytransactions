@@ -1,12 +1,12 @@
 import altair as alt
+#import datetime
 import pandas as pd
 
-from datetime import date
-from fastapi import FastAPI, Request, Form, Query
+from fastapi import FastAPI, Request, Form, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from typing import List, Optional
+from typing import Optional#, List
 
 from .application import Application 
 from .repositories import SQLiteTransactionRepository
@@ -43,9 +43,31 @@ async def add_transaction_form(request: Request):
             'success_message': "Transactions submitted successfully!" if success_message else None
         })
 
-@app.get('/update-transaction', response_class=HTMLResponse)
+@app.get('/update-transaction1', response_class=HTMLResponse)
 async def update_transaction_form(request: Request):
-    return templates.TemplateResponse('transaction_update_form.html', {'request': request})
+    return templates.TemplateResponse('update_transaction.html', {'request': request})
+
+# POST endpoint to fetch transaction details by ID
+@app.post('/api/transactions/')
+async def post_transaction(transaction_id: int = Form(...)):
+    transaction = sql_app.find_transaction(transaction_id)
+    if not transaction:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    return transaction
+
+# Endpoint to update a transaction
+@app.post('/api/update-transaction/')
+async def update_transaction(
+        transaction_id: int = Form(...),
+        amount: float = Form(...),
+        date: str = Form(...),
+        description: str = Form(...),
+        category: str = Form(...),
+        subcategory: str = Form(None),
+        notes: str = Form(None),
+    ):
+    sql_app.correct_transaction(transaction_id, amount, date, description, category, subcategory, notes)
+
 
 @app.get('/add-batch-transaction', response_class=HTMLResponse)
 async def add_batch_transaction(request: Request):
@@ -277,7 +299,7 @@ async def handle_transaction(
     notes: str = Form(None)
     ):
 
-    sql_app.create_transaction(amount, date, description, category, notes)
+    sql_app.create_transaction(amount, date, description, category, notes, None)
 
     # Get current budget categories
     categories = sql_app.list_categories()
@@ -290,42 +312,42 @@ async def handle_transaction(
         }
     )
 
-@app.post('/update-transaction', response_class=HTMLResponse)
-async def update_transaction(
-    request: Request, 
-    transaction_id: int = Form(...),
-    amount: float = Form(...),
-    date: str = Form(...),
-    description: str = Form(...),
-    category: str = Form(...),
-    notes: str = Form(None)
-    ):
-    sql_app.correct_transaction(
-        transaction_id, amount, 
-        date, description, 
-        category, notes
-    )
+# @app.post('/update-transaction', response_class=HTMLResponse)
+# async def update_transaction(
+#     request: Request, 
+#     transaction_id: int = Form(...),
+#     amount: float = Form(...),
+#     date: str = Form(...),  
+#     description: str = Form(...),
+#     category: str = Form(...),
+#     notes: str = Form(None)
+#     ):
+#     sql_app.correct_transaction(
+#         transaction_id, amount, 
+#         date, description, 
+#         category, notes
+#     )
 
-    # Get current budget categories
-    categories = sql_app.list_categories()
+#     # Get current budget categories
+#     categories = sql_app.list_categories()
 
-    return templates.TemplateResponse(
-        'transaction_form.html', 
-        {
-            'request': request,
-            'categories': categories
-        }
-    )
+#     return templates.TemplateResponse(
+#         'transaction_form.html', 
+#         {
+#             'request': request,
+#             'categories': categories
+#         }
+#     )
 
 @app.post('/add_recurring_expense', response_class=HTMLResponse)
 async def handle_recurring_expense(
-    request: Request, 
-    amount: int = Form(...),
-    frequency: str = Form(...),
-    category: str = Form(...),
-    description: str = Form(...),
-    notes: str = Form(None)
-):
+        request: Request, 
+        amount: int = Form(...),
+        frequency: str = Form(...),
+        category: str = Form(...),
+        description: str = Form(...),
+        notes: str = Form(None)
+    ):
     try:
         sql_app.create_recurring_expense(amount, frequency, category, description, notes)
         status_statement = f'Successfully added {description} recurring expense!'

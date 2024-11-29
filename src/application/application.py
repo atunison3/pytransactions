@@ -11,15 +11,14 @@ class Application:
     def __init__(self, repository: SQLiteTransactionRepository):
         self.repository = repository
 
-    def create_transaction(self, amount: float, date: str, description: str, category: str, notes: str) -> None:
+    def create_transaction(self, amount: float, date: str, description: str, category: str, notes: str, subcategory: str) -> None:
         '''Adds a transaction to database.'''
 
         # Correct the category
         category = category.title()
         
-        transaction = Transaction(None, amount, date, description, category.title(), notes)
+        transaction = Transaction(None, amount, date, description, category.title(), notes, subcategory)
         self.repository.create_transaction(transaction)
-        print(f"Transaction added: {transaction}")
 
     def create_category(self, description: str, monthly_allocation: float, notes: str) -> None:
         '''Adds a category to database'''
@@ -74,27 +73,25 @@ class Application:
     def find_transaction(self, transaction_id: int):
         '''Returns a transaction given the id'''
         transaction = self.repository.read_transaction_by_id(transaction_id)
-        if transaction:
-            print(f"\n\033[92mTransaction found:\033[0m {transaction}")
-        else:
-            print(f"\033[93mNo transaction found with ID {transaction_id}\033[0m")
         return transaction 
 
-    def correct_transaction(self, transaction_id: int, amount: float, date: str, description: str, category: str, notes: str) -> None:
+    def correct_transaction(self, transaction_id: int, amount: float, date: str, description: str, category: str, subcategory: str, notes: str) -> None:
         '''Updates a transaction'''
 
         # Correct the category 
         category = category.title()
 
         # Create a transaction
-        transaction = Transaction(transaction_id, amount, date, description, category, notes)
+        transaction = Transaction(transaction_id, amount, date, description, category, notes, subcategory)
 
         self.repository.update_transaction(transaction)
-        print(f"\033[92mTransaction updated {transaction}\033[0m")
 
     def delete_transaction(self, transaction_id: int):
         '''Deletes transaction'''
         self.repository.delete_transaction(transaction_id)
+
+    def print_test_statement(self):
+        return '\033[92mWorking!\033[0m'
 
 if __name__=='__main__':
     app = Application()

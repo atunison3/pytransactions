@@ -61,10 +61,10 @@ class SQLiteTransactionRepository:
             cursor = conn.cursor()
             cursor.execute('''
                 INSERT INTO transactions 
-                    (amount, date, description, category, notes)
+                    (amount, date, description, category, notes, subcategory)
                 VALUES 
-                    (?, ?, ?, ?, ?)
-            ''', (transaction.amount, transaction.date, transaction.description, transaction.category, transaction.notes))
+                    (?, ?, ?, ?, ?, ?)
+            ''', (transaction.amount, transaction.date, transaction.description, transaction.category, transaction.notes, transaction.subcategory))
             conn.commit()
             #transaction.transaction_id = cursor.lastrowid
 
@@ -120,9 +120,9 @@ class SQLiteTransactionRepository:
     def read_all_transactions(self) -> [Transaction]:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute('SELECT id, amount, date, description, category, notes FROM transactions;')
+            cursor.execute('SELECT * FROM transactions;')
             rows = cursor.fetchall()
-            return [Transaction(row[0], row[1], row[2], row[3], row[4], row[5]) for row in rows]
+            return [Transaction(*row) for row in rows]
 
     def read_all_recurring_expenses(self) -> [RecurringExpense]:
         with sqlite3.connect(self.db_path) as conn:
@@ -135,11 +135,11 @@ class SQLiteTransactionRepository:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(
-                'SELECT id, amount, date, description, category, notes FROM transactions WHERE id = ?', 
+                'SELECT * FROM transactions WHERE id = ?', 
                 (transaction_id,))
             row = cursor.fetchone()
             if row:
-                return Transaction(row[0], row[1], row[2], row[3], row[4], row[5])
+                return Transaction(*row)
             return None
 
     def read_last_seven_days(self) -> [Transaction]:
@@ -184,11 +184,11 @@ class SQLiteTransactionRepository:
             cursor.execute(
                 '''
                 UPDATE transactions 
-                SET amount=?, date=?, description=?, category=?, notes=?
+                SET amount=?, date=?, description=?, category=?, notes=?, subcategory=?
                 WHERE id=?
-                RETURNING id, amount, date, description, category, notes
+                RETURNING id, amount, date, description, category, notes, subcategory
                 ''',
-                (t.amount, t.date, t.description, t.category, t.notes, t.transaction_id)
+                (t.amount, t.date, t.description, t.category, t.notes, t.subcategory, t.transaction_id)
             )
             t = cursor.fetchone()
 

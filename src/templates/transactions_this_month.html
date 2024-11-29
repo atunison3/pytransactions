@@ -26,12 +26,19 @@
         <tr>
             <td>{{ transaction.transaction_id }}</td>
             <td>{{ transaction.date }}</td>
-            <td style="text-align: right;">{{ "%.2f" | format(transaction.amount) }}</td>
+            <td style="text-align: right;">{{ "$" + "{:,.2f}".format(transaction.amount) }}</td>
             <td>{{ transaction.description }}</td>
             <td>{{ transaction.category }}</td>
             <td>{{ transaction.notes }}</td>
         </tr>
         {% endfor %}
+        <tfoot>
+            <tr>
+                <td colspan="2"><strong>Total Spend</strong></td>
+                <td style="text-align: right;"><strong>{{ "$" + "{:,.2f}".format(transactions | sum(attribute='amount')) }}</strong></td>
+                <td colspan="3"></td>
+            </tr>
+        </tfoot>
     </tbody>
 </table>
 {% else %}
