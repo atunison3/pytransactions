@@ -68,7 +68,6 @@ async def update_transaction(
     ):
     sql_app.correct_transaction(transaction_id, amount, date, description, category, subcategory, notes)
 
-
 @app.get('/add-batch-transaction', response_class=HTMLResponse)
 async def add_batch_transaction(request: Request):
     # Get the current categories
@@ -92,8 +91,7 @@ async def process_itemized_transaction(
     notes: list[str] = Form(None)
     ):
     for i in range(len(notes)):
-        #sql_app.create_transaction(amount, date, description, category, notes)
-        sql_app.create_transaction(amounts[i], date, descriptions[i], categories[i], notes[i])
+        sql_app.create_transaction(amounts[i], date, descriptions[i], categories[i], None, notes[i])
 
     return RedirectResponse(url="/add-batch-transaction?success=true", status_code=303)
 
@@ -296,10 +294,11 @@ async def handle_transaction(
     date: str = Form(...),
     description: str = Form(...),
     category: str = Form(...),
+    subcategory: str = Form(None),
     notes: str = Form(None)
     ):
-
-    sql_app.create_transaction(amount, date, description, category, notes, None)
+    
+    sql_app.create_transaction(amount, date, description, category, subcategory, notes)
 
     # Get current budget categories
     categories = sql_app.list_categories()

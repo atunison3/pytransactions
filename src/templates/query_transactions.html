@@ -29,6 +29,7 @@
                 <th>Amount</th>
                 <th>Description</th>
                 <th>Category</th>
+                <th>Subcategory</th>
                 <th>Notes</th>
             </tr>
             {% for transaction in transactions %}
@@ -38,6 +39,7 @@
                 <td>{{ transaction["amount"] }}</td>
                 <td>{{ transaction["description"] }}</td>
                 <td>{{ transaction["category"] }}</td>
+                <td>{{ transaction["subcategory"] }}</td>
                 <td>{{ transaction["notes"] }}</td>
             </tr>
             {% endfor %}

@@ -11,12 +11,17 @@ class Application:
     def __init__(self, repository: SQLiteTransactionRepository):
         self.repository = repository
 
-    def create_transaction(self, amount: float, date: str, description: str, category: str, notes: str, subcategory: str) -> None:
+    def create_transaction(self, amount: float, date: str, description: str, category: str, subcategory: str, notes: str) -> None:
         '''Adds a transaction to database.'''
 
         # Correct the category
-        category = category.title()
-        
+        description = description.strip()
+        category = category.title().strip()
+        if subcategory:
+            subcategory = subcategory.strip()
+        if notes:
+            notes = notes.strip()
+            
         transaction = Transaction(None, amount, date, description, category.title(), notes, subcategory)
         self.repository.create_transaction(transaction)
 
