@@ -1,13 +1,15 @@
 import sqlite3
 
 try:
-    from domain.transaction import Transaction 
+    from domain.transaction import Transaction
     from domain.category import Category
     from domain.recurring_expense import RecurringExpense
+    from domain.user import User
 except ModuleNotFoundError:
     from ..domain.transaction import Transaction
     from ..domain.category import Category
     from ..domain.recurring_expense import RecurringExpense
+    from ..domain.user import User
 
 class SQLiteTransactionRepository:
     def __init__(self, db_path: str):
@@ -54,6 +56,20 @@ class SQLiteTransactionRepository:
             );
             ''')
             
+            conn.commit()
+
+    def create_user(self, user: User):
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                '''
+                INSERT INTO users 
+                    (username, password)
+                VALUES 
+                    (?, ?)
+                ''',
+                (user.username, user.password)
+            )
             conn.commit()
 
     def create_transaction(self, transaction: Transaction):
@@ -177,6 +193,20 @@ class SQLiteTransactionRepository:
             cursor.execute('SELECT * FROM categories;')
             rows = cursor.fetchall()
             return [Category(*row) for row in rows]
+
+    def read_user_by_username(self, username: str) -> User:
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                '''
+                SELECT * 
+                FROM users 
+                WHERE username = ?;
+                ''',
+                (username,)
+            )
+            rows = cursor.fetchone()
+            return User(*rows)
 
     def update_transaction(self, t: Transaction) -> None:
         with sqlite3.connect(self.db_path) as conn:

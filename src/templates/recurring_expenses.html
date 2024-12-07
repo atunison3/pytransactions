@@ -13,6 +13,33 @@
     {% endif %}
 {% endif %}
 
+{% if recurring_expenses %}
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Amount</th>
+            <th>Frequency</th>
+            <th>Description</th>
+            <th>Category</th>
+            <th>Notes</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for transaction in transactions %}
+        <tr>
+            <td>{{ transaction.transaction_id }}</td>
+            <td>{{ transaction.date }}</td>
+            <td>${{ transaction.amount }}</td>
+            <td>{{ transaction.description }}</td>
+            <td>{{ transaction.category }}</td>
+            <td>{{ transaction.notes }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
 <form action="/add_recurring_expense" method="POST">
     <!-- Amount -->
     <label for="amount">Amount:</label><br>
@@ -42,4 +69,20 @@
     <!-- Submit Button -->
     <button type="submit">Add Expense</button>
 </form>
+
+<script>
+    // Check if the token exists in localStorage
+    const token = localStorage.getItem('access_token');
+
+    if (!token) {
+        alert('You are not authorized to view this page.');
+        window.location.href = '/';
+    }
+
+    document.getElementById('logoutButton').addEventListener('click', function() {
+        localStorage.removeItem('access_token');
+        window.location.href = '/';
+    });
+</script>
+
 {% endblock %}

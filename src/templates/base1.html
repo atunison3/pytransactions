@@ -23,20 +23,7 @@
     <footer>
         <!--<p>&copy; 2024 My FastAPI App</p>-->
     </footer>
-    <script>
-        // Check if the token exists in localStorage
-        const token = localStorage.getItem('access_token');
-        
-        document.getElementById('logoutButton').addEventListener('click', function() {
-            localStorage.removeItem('access_token');
-            window.location.href = '/';
-        });
-        document.getElementById('logoutButton').addEventListener('click', function() {
-            localStorage.removeItem('access_token'); // Remove token from localStorage
-            window.location.href = '/'; // Redirect to login page
-        });
-        
-    </script>
+
 
     <script type="text/javascript">
         const chartSpec = {{ chart_json | safe }};

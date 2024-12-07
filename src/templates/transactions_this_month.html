@@ -45,6 +45,21 @@
 <p>No transactions found in the last 7 days.</p>
 {% endif %}
 
+<script>
+    // Check if the token exists in localStorage
+    const token = localStorage.getItem('access_token');
+
+    if (!token) {
+        alert('You are not authorized to view this page.');
+        window.location.href = '/';
+    }
+
+    document.getElementById('logoutButton').addEventListener('click', function() {
+        localStorage.removeItem('access_token');
+        window.location.href = '/';
+    });
+</script>
+
 <script type="text/javascript">
     const chartSpec = {{ chart_json | safe }};
     vegaEmbed('#chart', chartSpec).then(function(result) {

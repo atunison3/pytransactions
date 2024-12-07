@@ -29,6 +29,20 @@
         <button type="button" id="update-button">Update Transaction</button>
     </form>
     <script>
+        // Check if the token exists in localStorage
+        const token = localStorage.getItem('access_token');
+    
+        if (!token) {
+            alert('You are not authorized to view this page.');
+            window.location.href = '/';
+        }
+    
+        document.getElementById('logoutButton').addEventListener('click', function() {
+            localStorage.removeItem('access_token');
+            window.location.href = '/';
+        });
+    </script>
+    <script>
         document.addEventListener('DOMContentLoaded', () => {
             const transactionIdInput = document.getElementById('transaction_id');
             const form = document.getElementById('transaction-form');

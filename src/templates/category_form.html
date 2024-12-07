@@ -9,6 +9,25 @@
 
 <div id="chart"></div>
 
+<table>
+    <thead>
+        <tr>
+            <td>ID</td>
+            <td>Description</td>
+            <td>Monthly Allocation</td>
+        </tr>
+    </thead>
+    <tbody>
+        {% for category in categories %}
+        <tr>
+            <td>{{ category.category_id }}</td>
+            <td>{{ category.description }}</td>
+            <td style="text-align: right;">{{ "$" + "{:,.2f}".format(category.monthly_allocation) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
 <div class="transaction-container">
     <div class="transaction-form-box">
         <h3>Add a Category</h3>
@@ -45,12 +64,18 @@
     </div>
 </div>
 
-<script type="text/javascript">
-    const chartSpec = {{ chart_json | safe }};
-    vegaEmbed('#chart', chartSpec).then(function(result) {
-      console.log("Chart rendered successfully");
-    }).catch(function(error) {
-      console.error("Error rendering chart:", error);
+<script>
+    // Check if the token exists in localStorage
+    const token = localStorage.getItem('access_token');
+
+    if (!token) {
+        alert('You are not authorized to view this page.');
+        window.location.href = '/';
+    }
+
+    document.getElementById('logoutButton').addEventListener('click', function() {
+        localStorage.removeItem('access_token');
+        window.location.href = '/';
     });
 </script>
 

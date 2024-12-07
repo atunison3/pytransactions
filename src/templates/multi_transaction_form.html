@@ -16,6 +16,7 @@
                 <th>Description</th>
                 <th>Amount</th>
                 <th>Category</th>
+                <th>Subcategory</th>
                 <th>Notes</th>
                 <th>Action</th>
             </tr>
@@ -33,6 +34,7 @@
                     {% endfor %}
                     </select>
                 </td>
+                <td><input type="text" name="subcategories" placeholder="Subcategory"></td>
                 <td><input type="text" name="notes" placeholder="Notes"></td>
                 <td><button type="button" class="btn btn-danger" onclick="deleteRow(this)">Remove</button></td>
             </tr>
@@ -42,6 +44,21 @@
     <button type="button" class="btn" onclick="addRow()">Add Row</button><br><br>
     <button type="submit" class="btn">Submit Transactions</button>
 </form>
+
+<script>
+    // Check if the token exists in localStorage
+    const token = localStorage.getItem('access_token');
+
+    if (!token) {
+        alert('You are not authorized to view this page.');
+        window.location.href = '/';
+    }
+
+    document.getElementById('logoutButton').addEventListener('click', function() {
+        localStorage.removeItem('access_token');
+        window.location.href = '/';
+    });
+</script>
 
 <script>
     function addRow() {
@@ -59,6 +76,7 @@
                     {% endfor %}
                 </select>
             </td>
+            <td><input type="text" name="subcategories" placeholder="Subcategory"></td>
             <td><input type="text" name="notes" placeholder="Notes"></td>
             <td><button type="button" class="btn btn-danger" onclick="deleteRow(this)">Remove</button></td>
         `;

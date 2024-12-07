@@ -1,20 +1,62 @@
 import altair as alt
+import jwt
 #import datetime
 import pandas as pd
 
-from fastapi import FastAPI, Request, Form, HTTPException
+from datetime import datetime, timedelta
+from fastapi import FastAPI, Request, Form, HTTPException, Depends, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.security import OAuth2PasswordBearer
 from fastapi.templating import Jinja2Templates
+from passlib.context import CryptContext
 from typing import Optional#, List
 
 from .application import Application 
 from .repositories import SQLiteTransactionRepository
 
+# --- Constants ---
+SECRET_KEY = "your_secret_key"  # Change this to a more secure secret key
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30  # Token expires in 30 minutes
+
 app = FastAPI()
+
+# --- OAuth2 Bearer token scheme ---
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+
+# --- Get Current User from Token ---
+def get_current_user(token: str = Depends(oauth2_scheme)):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        return username
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
 # Initialize SQLite repository
 sqlite_repo = SQLiteTransactionRepository("transactions.db")
+
+# --- Password hashing context ---
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify that a plaintext password matches the hashed password."""
+    return pwd_context.verify(plain_password, hashed_password)
+
+# --- Token Creation Function ---
+def create_access_token(data: dict, expires_delta: timedelta = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
 
 # Create the application
 sql_app = Application(sqlite_repo)
@@ -25,9 +67,44 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # Set up templates
 templates = Jinja2Templates(directory="templates")
 
-@app.get("/", response_class=HTMLResponse)
+@app.get('/', response_class=HTMLResponse)
+async def read_main(request: Request):
+    return templates.TemplateResponse('home.html', {'request': request})
+
+@app.get("/home", response_class=HTMLResponse)
 async def read_home(request: Request):
-    return templates.TemplateResponse("home.html", {"request": request})
+    return templates.TemplateResponse("main_menu.html", {"request": request})
+
+@app.get('/login-page', response_class=HTMLResponse)
+async def read_login_page(request: Request):
+    return templates.TemplateResponse("login.html", {'request': request})
+
+@app.get('/register-page', response_class=HTMLResponse)
+async def read_register_page(request: Request):
+    return templates.TemplateResponse('register.html', {'request': request})
+
+# --- Login Endpoint ---
+@app.post("/login")
+async def login(username: str = Form(...), password: str = Form(...)):
+    user = sql_app.get_user_by_username(username)
+    if not user or not verify_password(password, user.password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(data={"sub": user.username}, expires_delta=access_token_expires)
+    return {"access_token": access_token, "token_type": "bearer"}
+
+# Register Endpoint
+@app.post("/register")
+async def register(username: str = Form(...), password: str = Form(...)):
+    sql_app.create_user(username, password)
+    return templates.TemplateResponse(
+
+    )
+
 
 @app.get("/add-transaction", response_class=HTMLResponse)
 async def add_transaction_form(request: Request):
@@ -88,10 +165,11 @@ async def process_itemized_transaction(
     descriptions: list[str] = Form(...),
     amounts: list[float] = Form(...),
     categories: list[str] = Form(...),
+    subcategories: list[str] = Form(...),
     notes: list[str] = Form(None)
     ):
     for i in range(len(notes)):
-        sql_app.create_transaction(amounts[i], date, descriptions[i], categories[i], None, notes[i])
+        sql_app.create_transaction(amounts[i], date, descriptions[i], categories[i], subcategories[i], notes[i])
 
     return RedirectResponse(url="/add-batch-transaction?success=true", status_code=303)
 
@@ -311,32 +389,53 @@ async def handle_transaction(
         }
     )
 
-# @app.post('/update-transaction', response_class=HTMLResponse)
-# async def update_transaction(
-#     request: Request, 
-#     transaction_id: int = Form(...),
-#     amount: float = Form(...),
-#     date: str = Form(...),  
-#     description: str = Form(...),
-#     category: str = Form(...),
-#     notes: str = Form(None)
-#     ):
-#     sql_app.correct_transaction(
-#         transaction_id, amount, 
-#         date, description, 
-#         category, notes
-#     )
+@app.get('/categories/breakdown', response_class=HTMLResponse)
+async def categories_breakdown(request: Request):
 
-#     # Get current budget categories
-#     categories = sql_app.list_categories()
+    # Get current budget categories
+    categories = sql_app.list_categories()
 
-#     return templates.TemplateResponse(
-#         'transaction_form.html', 
-#         {
-#             'request': request,
-#             'categories': categories
-#         }
-#     )
+    return templates.TemplateResponse(
+        'breakdown.html',
+        {
+            'request': request,
+            'categories': categories
+        }
+    )
+
+@app.post("/categories/get_chart", response_class=HTMLResponse)
+async def get_chart(request: Request, category: str = Form(...)):
+    # Extract the selected category from the request body
+    #category = request_data.category
+
+    # Get current budget categories
+    categories = sql_app.list_categories()
+
+    filtered_data = pd.DataFrame({
+        'week': [0, 1, 2, 3, 4],
+        'amount': [100, 200, 100, 300, 100],
+        'category': ['a', 'b', 'c', 'a', 'b']
+    })
+
+    # Create an Altair chart
+    chart = alt.Chart(filtered_data).mark_bar().encode(
+        x="week:O",
+        y="amount:Q",
+        color="category:N"
+    )
+
+    # Embed chart as an HTML snippet
+    chart_json = chart.to_json()
+
+    # Return the chart HTML
+    return templates.TemplateResponse(
+        'breakdown.html',
+        {
+            'request': request, 
+            'categories': categories, 
+            'chart_json': chart_json
+        }
+    )
 
 @app.post('/add_recurring_expense', response_class=HTMLResponse)
 async def handle_recurring_expense(

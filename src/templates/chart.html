@@ -6,6 +6,21 @@
 <h2>Altair Chart Example</h2>
 <div id="chart"></div>
 
+<script>
+    // Check if the token exists in localStorage
+    const token = localStorage.getItem('access_token');
+
+    if (!token) {
+        alert('You are not authorized to view this page.');
+        window.location.href = '/';
+    }
+
+    document.getElementById('logoutButton').addEventListener('click', function() {
+        localStorage.removeItem('access_token');
+        window.location.href = '/';
+    });
+</script>
+
 <script src="https://cdn.jsdelivr.net/npm/vega@5.20.2"></script>
 <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.6.0"></script>
 <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.22.0"></script>
@@ -13,4 +28,6 @@
     const chartSpec = {{ chart_json | safe }};
     vegaEmbed('#chart', chartSpec).catch(console.error);
 </script>
+
+
 {% endblock %}

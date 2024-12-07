@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Category Breakdown{% endblock %} 
+
+{% block content %} 
+
+{% if chart_json %}
+<div id="chart"></div>
+{% endif %}
+
+<form method="post" action="/submit-query-transaction">
+    <label for="category">Category:</label>
+            <select id="category" name="category" required>
+                {% for category in categories %}
+                    <option value="{{ category.description }}">{{ category.description }}</option>
+                {% endfor %}
+            </select><br><br>
+</form>
+
+<script>
+    const categorySelect = document.getElementById('category');
+    const chartDiv = document.getElementById('chart');
+
+    // Function to fetch and render the chart
+    async function updateChart(category) {
+        try {
+            const response = await fetch('/categories/get_chart');
+            const spec = await response.json();
+            vegaEmbed(chartDiv, spec);
+        } catch (error) {
+            console.error("Error loading chart:", error);
+        }
+    }
+
+    // Initial chart render
+    updateChart(categorySelect.value);
+
+    // Event listener for dropdown
+    categorySelect.addEventListener('change', () => {
+        updateChart(categorySelect.value);
+    });
+</script>
+
+{% endblock %}

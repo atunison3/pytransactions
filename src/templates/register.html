@@ -1,0 +1,18 @@
+{% extends "base1.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+<h3>Don't have an account?</h3>
+<form action="/register" method="post">
+    <label for="reg_username">Username</label><br>
+    <input type="text" id="reg_username" name="username" required><br><br>
+
+    <label for="reg_password">Password</label><br>
+    <input type="password" id="reg_password" name="password" required><br><br>
+
+    <button type="submit">Register</button>
+</form>
+
+{% endblock %}

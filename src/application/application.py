@@ -1,15 +1,35 @@
+from passlib.context import CryptContext
+
 try:
-    from domain import Transaction, Category, RecurringExpense
+    from domain import Transaction, Category, RecurringExpense, User
     from repositories import SQLiteTransactionRepository
 except ModuleNotFoundError:
     from ..domain.transaction import Transaction
     from ..domain.category import Category 
     from ..domain.recurring_expense import RecurringExpense
+    from ..domain.user import User
     from ..repositories.sqlite_repository import SQLiteTransactionRepository
+
+# --- Password hashing context ---
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class Application:
     def __init__(self, repository: SQLiteTransactionRepository):
         self.repository = repository
+
+    def get_user_by_username(self, username: str) -> User:
+        return self.repository.read_user_by_username(username)
+
+    def create_user(self, username: str, password: str):
+        '''Creates a user in database'''
+
+        # Hash user password
+        hashed_password = pwd_context.hash(password)
+
+        # Create user entity
+        user = User(None, username, hashed_password)
+
+        self.repository.create_user(user)
 
     def create_transaction(self, amount: float, date: str, description: str, category: str, subcategory: str, notes: str) -> None:
         '''Adds a transaction to database.'''
@@ -21,7 +41,7 @@ class Application:
             subcategory = subcategory.strip()
         if notes:
             notes = notes.strip()
-            
+
         transaction = Transaction(None, amount, date, description, category.title(), notes, subcategory)
         self.repository.create_transaction(transaction)
 
